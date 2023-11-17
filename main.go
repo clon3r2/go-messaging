@@ -18,8 +18,6 @@ func init() {
 }
 
 func main() {
-	// TODO: check fiber socket
-	// TODO: check echo socket
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
