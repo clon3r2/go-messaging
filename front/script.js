@@ -1,25 +1,28 @@
 let socketUri = 'ws://127.0.0.1:8000/socket/';
-
-var ws = new WebSocket(socketUri)
+let ws = new WebSocket(socketUri);
 
 ws.onmessage = function(evt) {
-    const out = document.getElementById('output');
-    out.innerHTML += 'new msg = ' + evt.data + '<br>';
+    console.log("got a new msg ==> ", evt)
+    const out = document.getElementById('msgOutput');
+    out.innerHTML += `<div class="card-body text-center text-bold">${evt.data}</div>`;
 
 }
 
-ws.onclose = (s) => {
-    console.log("close !!")
-    setInterval(()=>{ws.send("ping")},1000)
+ws.onclose = () => {
+    console.log("closed !!")
+    setInterval(()=>{
+        if (ws.readyState !== WebSocket.OPEN){
+        ws = new WebSocket(socketUri);} else {
+            console.log("connected again!")
+        }
+        clearInterval(this.id)
+    },1000)
 }
 
-setInterval(sendMessage, 1000);
+function SendMessage() {
+    inputElem = document.getElementById("msgInput")
 
-function sendMessage () {
-    if (ws.readyState === WebSocket.OPEN){
-        ws.send('Hello, Server!');
-    } else {
-        console.log("connection is closed. cant send message")
-        console.log(`staatus = ${ws.readyState}`)
+    if (inputElem.value !== "") {
+        ws.send(inputElem.value)
     }
 }
