@@ -5,11 +5,9 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"log"
 	"main/db"
 	"main/server"
 	"net/http"
-	"time"
 )
 
 func MakeNewServer() Server {
@@ -70,37 +68,4 @@ func main() {
 	e.Use(middleware.Recover())
 	e.GET("/socket/", baseServer.NewConnectionHandler)
 	e.Logger.Fatal(e.Start(":8000"))
-}
-
-func SocketHandler(c echo.Context) error {
-	WSConn, err := server.Upgrader.Upgrade(c.Response(), c.Request(), nil)
-	if err != nil {
-		c.Logger().Error(err)
-	}
-	defer func(WSConn *websocket.Conn) {
-		err := WSConn.Close()
-		if err != nil {
-
-		}
-	}(WSConn)
-	i := 0
-	for {
-		fmt.Println("azaval")
-		writer, err := WSConn.NextWriter(websocket.TextMessage)
-		if err != nil {
-			continue
-		}
-		_, err = writer.Write([]byte(fmt.Sprintf("gooooz --> %v", i)))
-		if err != nil {
-			continue
-		}
-		time.Sleep(time.Second * 5)
-		msgType, _, err := WSConn.NextReader()
-		if err != nil {
-			log.Printf("error reading msg => %v", err)
-			continue
-		}
-		fmt.Printf("\n-----received new msg -----\nmsgType ==> %+v", msgType)
-		i++
-	}
 }
