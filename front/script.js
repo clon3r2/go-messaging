@@ -1,28 +1,40 @@
-let socketUri = 'ws://127.0.0.1:8080/socket/';
-let ws = new WebSocket(socketUri);
+let socketUri = 'ws://127.0.0.1:8081/socket/';
+let ws = makeConnection()
+let inputElem = document.getElementById("msgInput")
+let sendBtn = document.getElementById("send-btn")
+sendBtn.disabled=true
+inputElem.addEventListener("input", ()=>{
+    sendBtn.disabled = inputElem.value === ""
+})
 
-ws.onmessage = function(evt) {
-    console.log("got a new msg ==> ", evt)
-    const out = document.getElementById('msgOutput');
-    out.innerHTML += `<div class="card-body text-center text-bold">${evt.data}</div>`;
 
-}
-
-ws.onclose = () => {
-    console.log("closed !!")
-    setInterval(()=>{
-        if (ws.readyState !== WebSocket.OPEN){
-        ws = new WebSocket(socketUri);} else {
-            console.log("connected again!")
-        }
-        clearInterval(this.id)
-    },1000)
+function makeConnection(outputElem) {
+    let conn = new WebSocket(socketUri);
+    conn.onmessage = (evt) => {
+        console.log("got a new msg ==> ", evt)
+        outputElem = document.getElementById("msgOutput")
+        outputElem.innerHTML += `<div class="card-body text-center text-bold bg-primary mb-2">${evt.data}</div>`;
+    }
+    conn.onclose = () => {
+        console.log("connection lost !")
+        //TODO: auto-reconnect before send new msg somehow
+    }
+    return conn
 }
 
 function SendMessage() {
-    inputElem = document.getElementById("msgInput")
-
-    if (inputElem.value !== "") {
+    console.log("azaval")
+    if (ws.readyState === WebSocket.CLOSED) {
+        console.log("no connection available, created new connection.")
+        ws = makeConnection()
+    }
+    if (ws.readyState !== WebSocket.CONNECTING) {
         ws.send(inputElem.value)
+        console.log("msg sent successfully.")
+        inputElem.value = ""
+        sendBtn.disabled = true
+    } else {
+        console.log("connection pending, retrying ... ")
+        setTimeout(SendMessage, 500)
     }
 }
