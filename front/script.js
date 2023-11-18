@@ -1,4 +1,4 @@
-let socketUri = 'ws://127.0.0.1:8000/socket/';
+let socketUri = 'ws://127.0.0.1:8080/socket/';
 let ws = new WebSocket(socketUri);
 
 ws.onmessage = function(evt) {

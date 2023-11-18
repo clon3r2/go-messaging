@@ -12,12 +12,12 @@ import (
 
 func MakeNewServer() Server {
 	return Server{
-		connections: make(map[*websocket.Conn]bool),
+		pool: make(map[*websocket.Conn]bool),
 	}
 }
 
 type Server struct {
-	connections map[*websocket.Conn]bool
+	pool map[*websocket.Conn]bool
 }
 
 func (s *Server) NewConnectionHandler(c echo.Context) error {
@@ -25,10 +25,9 @@ func (s *Server) NewConnectionHandler(c echo.Context) error {
 	if err != nil {
 		c.Logger().Error(err)
 	}
-	s.connections[WSConn] = true
-	fmt.Printf("loggin all connections ==> %+v", s.connections)
+	s.pool[WSConn] = true
+	fmt.Printf("new connection added to pool. total number of pool connections: %v\n\n\n", len(s.pool))
 	go s.ReadLoop(WSConn)
-
 	return nil
 }
 
@@ -44,8 +43,8 @@ func (s *Server) ReadLoop(c *websocket.Conn) {
 }
 
 func (s *Server) broadCast(msg []byte) {
-	for con := range s.connections {
-		if s.connections[con] {
+	for con := range s.pool {
+		if s.pool[con] {
 			err := con.WriteMessage(websocket.TextMessage, msg)
 			if err != nil {
 				fmt.Printf("error writing msg to conn %v", con)
@@ -67,5 +66,5 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.GET("/socket/", baseServer.NewConnectionHandler)
-	e.Logger.Fatal(e.Start(":8000"))
+	e.Logger.Fatal(e.Start(":8080"))
 }
