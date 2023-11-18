@@ -9,6 +9,7 @@
             background-color: #232323;
         }
     </style>
+
 </head>
 
 
@@ -16,11 +17,12 @@
 
 
     <div class="container p-3">
-    <label for="msgInput" class="form-label text-secondary">enter message here</label>
-    <input type="text" class="form-control" id="msgInput" placeholder="hi ...">
-    <button class="btn btn-info" onclick="SendMessage()">send</button>
+        <label for="msgInput" class="form-label text-secondary">enter message here</label>
+        <input type="text" class="form-control" id="msgInput" placeholder="hi ...">
+        <button class="btn btn-info mt-2" onclick="SendMessage()" id="send-btn">send</button>
 
-    <div class="card block mt-5" id="msgOutput"></div>
+        <div class="card block mt-5 p-3" id="msgOutput"></div>
+
     </div>
 
 
