@@ -21,6 +21,7 @@ type Server struct {
 }
 
 func (s *Server) NewConnectionHandler(c echo.Context) error {
+	//TODO: add authentication check here before making socket connection
 	WSConn, err := server.Upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		c.Logger().Error(err)
@@ -37,19 +38,26 @@ func (s *Server) ReadLoop(c *websocket.Conn) {
 		if err != nil {
 			break
 		}
-		fmt.Printf("new msg => %s", msg)
+		fmt.Printf("\n new msg => %s\n", msg)
 		go s.broadCast(msg)
 	}
 }
 
 func (s *Server) broadCast(msg []byte) {
+	fmt.Println("\n#log all conns: ")
+	for con := range s.pool {
+		fmt.Printf("addr => %s    status => %v\n", con.RemoteAddr(), s.pool[con])
+	}
+	fmt.Println("# end log\n")
 	for con := range s.pool {
 		if s.pool[con] {
 			err := con.WriteMessage(websocket.TextMessage, msg)
 			if err != nil {
-				fmt.Printf("error writing msg to conn %v", con)
+				fmt.Printf("error writing msg to conn %v, connection closed.\n", con.RemoteAddr())
+				s.pool[con] = false
 				continue
 			}
+			fmt.Printf("successfully sent '%s' to %v\n", msg, con.RemoteAddr())
 		}
 	}
 }
@@ -66,5 +74,5 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.GET("/socket/", baseServer.NewConnectionHandler)
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8081"))
 }
