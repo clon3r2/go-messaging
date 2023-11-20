@@ -18,12 +18,12 @@ type User struct {
 	Password string
 }
 
-func (user *User) setPassword(rawPassword string) {
+func (user *User) SetPassword(rawPassword string) {
 	hash := sha256.Sum256([]byte(rawPassword))
 	user.Password = base64.StdEncoding.EncodeToString(hash[:])
 }
 
-func (user *User) checkPassword(rawPassword string) bool {
+func (user *User) CheckPassword(rawPassword string) bool {
 	hash := sha256.Sum256([]byte(rawPassword))
 	return user.Password == base64.StdEncoding.EncodeToString(hash[:])
 }

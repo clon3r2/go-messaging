@@ -1,9 +1,9 @@
-let socketUri = 'ws://127.0.0.1:8081/socket/';
+let socketUri = 'ws://127.0.0.1:8080/socket/';
 let ws = makeConnection()
 let inputElem = document.getElementById("msgInput")
 let sendBtn = document.getElementById("send-btn")
-sendBtn.disabled=true
-inputElem.addEventListener("input", ()=>{
+sendBtn.disabled = true
+inputElem.addEventListener("input", () => {
     sendBtn.disabled = inputElem.value === ""
 })
 

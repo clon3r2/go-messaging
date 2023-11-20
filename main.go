@@ -71,8 +71,54 @@ func init() {
 func main() {
 	baseServer := MakeNewServer()
 	e := echo.New()
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.GET("/socket/", baseServer.NewConnectionHandler)
-	e.Logger.Fatal(e.Start(":8081"))
+	e.POST("/signup/", SignUp)
+	e.POST("/login/", Login)
+	e.Logger.Fatal(e.Start(":8080"))
+}
+
+func Login(c echo.Context) error {
+	// TODO: login does not work properly
+	type loginData struct {
+		Username string
+		Password string
+	}
+	var payload loginData
+	err := c.Bind(&payload)
+	if err != nil {
+		fmt.Println("api err => ", err)
+		return c.JSON(400, err.Error())
+	}
+	fmt.Printf("\n\ngot payload => %+v\n\n", payload)
+	user, err := server.UserLogin(payload.Username, payload.Password)
+	if err != nil {
+		fmt.Println("service err ==> ", err)
+		return c.JSON(400, err.Error())
+	}
+
+	return c.JSON(200, user)
+}
+
+func SignUp(c echo.Context) error {
+	// tOdo: add data validation
+	var user db.User
+	err := c.Bind(&user)
+	if err != nil {
+		fmt.Println("user payload====>")
+		return echo.NewHTTPError(400, err)
+	}
+	result := server.UserSignUp(&user)
+	if result.Error != nil {
+		fmt.Printf("res ==> %+v", result)
+		fmt.Println("db err => ", result.Error)
+		return echo.NewHTTPError(400, result.Error)
+	}
+	fmt.Printf("\n\n\nresult == > %+v", result)
+	return c.JSON(200, user)
 }
